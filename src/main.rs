@@ -21,7 +21,6 @@ fn panic(info: &PanicInfo) -> ! {
   }
 }
 
-#[no_mangle]
 fn kernel_main(boot_info:   &'static BootInfo) -> ! {
   // This is where the kernel code starts
   println!("[ KERNEL START ] Started loading kernel...");
