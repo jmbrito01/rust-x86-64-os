@@ -4,7 +4,8 @@
 
 use core::panic::PanicInfo;
 
-use x86_64::registers::control::Cr3;
+use bootloader::BootInfo;
+bootloader::entry_point!(kernel_main);
 
 mod vga_buffer;
 mod interrupts;
@@ -21,7 +22,7 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 #[no_mangle]
-pub extern "C" fn _start() -> ! {
+fn kernel_main(boot_info:   &'static BootInfo) -> ! {
   // This is where the kernel code starts
   println!("[ KERNEL START ] Started loading kernel...");
 
