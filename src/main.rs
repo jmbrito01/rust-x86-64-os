@@ -1,11 +1,15 @@
 #![no_std]
 #![no_main]
-#![feature(asm,abi_x86_interrupt)]
+#![feature(asm,abi_x86_interrupt,alloc_error_handler)]
 
 use core::panic::PanicInfo;
 
 use bootloader::BootInfo;
 use x86_64::{VirtAddr, structures::paging::{Translate}};
+
+use crate::{allocator::init_heap, memory::BootInfoFrameAllocator};
+extern crate alloc;
+use alloc::boxed::Box;
 
 //use crate::memory::active_level_4_table;
 bootloader::entry_point!(kernel_main);
@@ -15,6 +19,7 @@ mod interrupts;
 mod gdt;
 mod serial;
 mod memory;
+mod allocator;
 
 /// This function is called on panic.
 #[panic_handler]
@@ -23,6 +28,11 @@ fn panic(info: &PanicInfo) -> ! {
   loop {
     x86_64::instructions::hlt();
   }
+}
+
+#[alloc_error_handler]
+fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
+    panic!("allocation error: {:?}", layout)
 }
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
@@ -37,38 +47,16 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
   unsafe { interrupts::PICS.lock().initialize() };
   x86_64::instructions::interrupts::enable();
 
+  // Initializee Page Tables and Heap
   let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
-  // new: initialize a mapper
-  let mapper = unsafe { memory::init(phys_mem_offset) };
-  let addresses = [
-    // the identity-mapped vga buffer page
-    0xb8000,
-    // some code page
-    0x201008,
-    // some stack page
-    0x0100_0020_1a10,
-    // virtual address mapped to physical address 0
-    boot_info.physical_memory_offset,
-  ];
-
-
-
-  for &address in &addresses {
-    let virt = VirtAddr::new(address);
-    let phys = unsafe { mapper.translate_addr(virt) };
-    println!("{:?} -> {:?}", virt, phys);
-  }
+  let mut mapper = unsafe { memory::init(phys_mem_offset) };
+  let mut frame_allocator = unsafe {
+    BootInfoFrameAllocator::init(&boot_info.memory_map)
+  };
+  allocator::init_heap(&mut mapper, &mut frame_allocator)
+    .expect("Heap Allocation failed");
 
   loop {
     x86_64::instructions::hlt();
   }
-  // Simulate interrupt
-  // x86_64::instructions::interrupts::int3(); // new
-
-  // Simulate page fault
-  // unsafe {
-  //   *(0xdeadbeef as *mut u64) = 42;
-  // };
-  // fn stack_overflow() {
-  //   stack_overflow(); // for each recursion, the return address is pushed
 }
