@@ -20,6 +20,7 @@ mod gdt;
 mod serial;
 mod memory;
 mod allocator;
+mod task;
 
 /// This function is called on panic.
 #[panic_handler]
@@ -56,7 +57,21 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
   allocator::init_heap(&mut mapper, &mut frame_allocator)
     .expect("Heap Allocation failed");
 
+  let mut executor = task::simple_executor::SimpleExecutor::new();
+  executor.spawn(task::Task::new(example_task()));
+  executor.spawn(task::Task::new(task::keyboard::print_keypresses()));
+  executor.run();
+
   loop {
     x86_64::instructions::hlt();
   }
+}
+
+async fn async_number() -> u32 {
+  42
+}
+
+async fn example_task() {
+  let number = async_number().await;
+  println!("async number: {}", number);
 }
