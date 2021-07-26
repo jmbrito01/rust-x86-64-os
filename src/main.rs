@@ -7,9 +7,8 @@ use core::panic::PanicInfo;
 use bootloader::BootInfo;
 use x86_64::{VirtAddr, structures::paging::{Translate}};
 
-use crate::{allocator::init_heap, memory::BootInfoFrameAllocator};
+use crate::memory::BootInfoFrameAllocator;
 extern crate alloc;
-use alloc::boxed::Box;
 
 //use crate::memory::active_level_4_table;
 bootloader::entry_point!(kernel_main);
@@ -57,21 +56,8 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
   allocator::init_heap(&mut mapper, &mut frame_allocator)
     .expect("Heap Allocation failed");
 
-  let mut executor = task::simple_executor::SimpleExecutor::new();
-  executor.spawn(task::Task::new(example_task()));
-  executor.spawn(task::Task::new(task::keyboard::print_keypresses()));
-  executor.run();
+  let mut thread = task::executor::Executor::new();
+  thread.spawn(task::Task::new(task::keyboard::print_keypresses()));
 
-  loop {
-    x86_64::instructions::hlt();
-  }
-}
-
-async fn async_number() -> u32 {
-  42
-}
-
-async fn example_task() {
-  let number = async_number().await;
-  println!("async number: {}", number);
+  thread.run();
 }
