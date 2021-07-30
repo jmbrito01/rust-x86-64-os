@@ -43,3 +43,7 @@ test-args = [
     "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", "-serial", "stdio",
     "-display", "none"
 ]
+# The command invoked with the created bootimage (the "{}" will be replaced
+# with the path to the bootable disk image)
+# Applies to `bootimage run` and `bootimage runner`
+run-command = ["qemu-system-x86_64", "-drive", "id=boot,format=raw,file={}", "-drive", "id=hd,format=raw,file=/Users/joao/Projects/rust/rust-os/os-x86/disk.img", "-vga", "cirrus" ]
