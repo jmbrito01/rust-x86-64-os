@@ -6,8 +6,8 @@ use core::{pin::Pin, task::{Poll, Context}};
 use futures_util::stream::Stream;
 use futures_util::task::AtomicWaker;
 
-use crate::println;
-use crate::print;
+use crate::kprintln;
+use crate::kprint;
 
 /// Called by the keyboard interrupt handler
 ///
@@ -15,12 +15,12 @@ use crate::print;
 pub(crate) fn add_scancode(scancode: u8) {
   if let Ok(queue) = SCANCODE_QUEUE.try_get() {
     if let Err(_) = queue.push(scancode) {
-      println!("WARNING: scancode queue full; dropping keyboard input");
+      kprintln!("WARNING: scancode queue full; dropping keyboard input");
     } else {
       WAKER.wake();
     }
   } else {
-    println!("WARNING: scancode queue uninitialized");
+    kprintln!("WARNING: scancode queue uninitialized");
   }
 }
 
@@ -32,8 +32,8 @@ pub async fn print_keypresses() {
     if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
       if let Some(key) = keyboard.process_keyevent(key_event) {
         match key {
-          DecodedKey::Unicode(character) => print!("{}", character),
-          DecodedKey::RawKey(key) => print!("{:?}", key),
+          DecodedKey::Unicode(character) => kprint!("{}", character),
+          DecodedKey::RawKey(key) => kprint!("{:?}", key),
         }
       }
     }

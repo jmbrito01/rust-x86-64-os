@@ -1,5 +1,5 @@
 use x86_64::structures::idt::{InterruptStackFrame, PageFaultErrorCode};
-use crate::println;
+use crate::kprintln;
 
 pub extern "x86-interrupt" fn page_fault_handler(
   stack_frame: InterruptStackFrame,
@@ -7,8 +7,8 @@ pub extern "x86-interrupt" fn page_fault_handler(
 ) {
   use x86_64::registers::control::Cr2;
 
-  println!("EXCEPTION: PAGE FAULT");
-  println!("Accessed Address: {:?}", Cr2::read());
-  println!("Error Code: {:?}", error_code);
-  println!("{:#?}", stack_frame);
+  kprintln!("EXCEPTION: PAGE FAULT");
+  kprintln!("Accessed Address: {:?}", Cr2::read());
+  kprintln!("Error Code: {:?}", error_code);
+  kprintln!("{:#?}", stack_frame);
 }

@@ -1,11 +1,10 @@
 use x86_64::structures::idt::InterruptStackFrame;
-use crate::interrupts::{InterruptIndex, PICS};
-use crate::{println, time};
+use crate::{kprintln, kernel::{interrupts::{InterruptIndex, PICS}, time}};
 
 pub extern "x86-interrupt" fn rtc_interrupt_handler(
   stack_frame: InterruptStackFrame)
 {
-  println!(".");
+  kprintln!(".");
   time::on_rtc_interrupt(stack_frame);
   
   unsafe {

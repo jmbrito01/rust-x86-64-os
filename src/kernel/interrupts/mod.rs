@@ -1,11 +1,9 @@
 
 
 use x86_64::structures::idt::InterruptDescriptorTable;
-use x86_64::structures::idt::InterruptStackFrame;
 use lazy_static::lazy_static;
-use x86_64::structures::idt::PageFaultErrorCode;
-use crate::gdt;
-use crate::println;
+use crate::kernel::gdt;
+use crate::kprintln;
 use pic8259::ChainedPics;
 use spin;
 
@@ -46,9 +44,9 @@ lazy_static! {
 }
 
 pub fn init_idt() {
-  println!("[ INTERRUPTS ] Starting to load IDT.");
+  kprintln!("[ INTERRUPTS ] Starting to load IDT.");
   IDT.load();
-  println!("[ INTERRUPTS ] IDT loaded successfully.");
+  kprintln!("[ INTERRUPTS ] IDT loaded successfully.");
 }
 
 pub fn without_interrupts<F, R>(f: F) -> R where F: FnOnce() -> R {

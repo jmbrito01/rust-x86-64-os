@@ -1,4 +1,4 @@
-use crate::interrupts;
+use crate::kernel::interrupts;
 
 use super::{Task, TaskId};
 use alloc::{collections::BTreeMap, sync::Arc};

@@ -1,6 +1,8 @@
 use x86_64::structures::idt::InterruptStackFrame;
 use lazy_static::lazy_static;
-use crate::interrupts::{InterruptIndex, PICS};
+use kernel::interrupts::{InterruptIndex, PICS};
+
+use crate::kernel;
 
 pub extern "x86-interrupt" fn keyboard_interrupt_handler(
   _stack_frame: InterruptStackFrame
@@ -19,7 +21,7 @@ pub extern "x86-interrupt" fn keyboard_interrupt_handler(
   let mut port = Port::new(0x60);
 
   let scancode: u8 = unsafe { port.read() };
-  crate::task::keyboard::add_scancode(scancode); // new
+  kernel::task::keyboard::add_scancode(scancode); // new
 
   unsafe {
     PICS.lock()

@@ -1,6 +1,6 @@
 use core::{convert::TryInto, sync::atomic::{AtomicUsize, AtomicU64, Ordering}};
 use x86_64::{instructions::port::Port, structures::idt::InterruptStackFrame};
-use crate::{interrupts, println};
+use crate::{kprintln, kernel::{interrupts}};
 
 const PIT_FREQUENCY: f64 = 3_579_545.0 / 3.0; // 1_193_181.666 Hz
 const PIT_DIVIDER: usize = 1193;
