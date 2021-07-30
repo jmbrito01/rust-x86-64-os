@@ -1,6 +1,8 @@
 use x86_64::{PhysAddr, VirtAddr, structures::paging::{FrameAllocator, OffsetPageTable, Page, PageTable, PhysFrame, Size4KiB}};
 use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
 
+pub mod allocator;
+
 /// Initialize a new OffsetPageTable.
 ///
 /// This function is unsafe because the caller must guarantee that the

@@ -18,7 +18,6 @@ mod interrupts;
 mod gdt;
 mod serial;
 mod memory;
-mod allocator;
 mod task;
 
 /// This function is called on panic.
@@ -53,11 +52,15 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
   let mut frame_allocator = unsafe {
     BootInfoFrameAllocator::init(&boot_info.memory_map)
   };
-  allocator::init_heap(&mut mapper, &mut frame_allocator)
+  memory::allocator::init_heap(&mut mapper, &mut frame_allocator)
     .expect("Heap Allocation failed");
 
   let mut thread = task::executor::Executor::new();
   thread.spawn(task::Task::new(task::keyboard::print_keypresses()));
 
   thread.run();
+}
+
+fn get_last_result() {
+
 }

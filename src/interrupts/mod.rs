@@ -54,6 +54,9 @@ pub fn init_idt() {
 pub enum InterruptIndex {
     Timer = PIC_1_OFFSET,
     Keyboard,
+    FloppyDisk = 6,
+    PrimaryATAHardDisk = 14,
+    SecondaryATAHardDisk = 15,
 }
 
 impl InterruptIndex {
