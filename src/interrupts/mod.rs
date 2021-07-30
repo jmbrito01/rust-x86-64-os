@@ -14,6 +14,7 @@ pub mod timer;
 pub mod page_fault;
 pub mod breakpoint;
 pub mod double_fault;
+pub mod rtc;
 
 pub const PIC_1_OFFSET: u8 = 32;
 pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
@@ -37,6 +38,9 @@ lazy_static! {
     idt[InterruptIndex::Keyboard.as_usize()]
       .set_handler_fn(keyboard::keyboard_interrupt_handler);
 
+    idt[InterruptIndex::RTC.as_usize()]
+      .set_handler_fn(rtc::rtc_interrupt_handler);
+
     idt
   };
 }
@@ -47,6 +51,24 @@ pub fn init_idt() {
   println!("[ INTERRUPTS ] IDT loaded successfully.");
 }
 
+pub fn without_interrupts<F, R>(f: F) -> R where F: FnOnce() -> R {
+  use x86_64::instructions::interrupts::{are_enabled, disable, enable};
+
+  let is_enabled = are_enabled();
+
+  if is_enabled {
+    disable();
+  }
+
+  let ret = f();
+
+  // Only re-enable if it was enabled before
+  if is_enabled {
+    enable();
+  }
+
+  ret
+}
 
 
 #[derive(Debug, Clone, Copy)]
@@ -54,9 +76,10 @@ pub fn init_idt() {
 pub enum InterruptIndex {
     Timer = PIC_1_OFFSET,
     Keyboard,
-    FloppyDisk = 6,
-    PrimaryATAHardDisk = 14,
-    SecondaryATAHardDisk = 15,
+    RTC = PIC_1_OFFSET + 8,
+    // FloppyDisk = 6,
+    // PrimaryATAHardDisk = 14,
+    // SecondaryATAHardDisk = 15,
 }
 
 impl InterruptIndex {

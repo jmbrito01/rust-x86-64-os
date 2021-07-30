@@ -1,6 +1,6 @@
 #![no_std]
 #![no_main]
-#![feature(asm,abi_x86_interrupt,alloc_error_handler)]
+#![feature(asm,llvm_asm,abi_x86_interrupt,alloc_error_handler)]
 
 use core::panic::PanicInfo;
 
@@ -19,6 +19,7 @@ mod gdt;
 mod serial;
 mod memory;
 mod task;
+mod time;
 
 /// This function is called on panic.
 #[panic_handler]
@@ -46,6 +47,11 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
   unsafe { interrupts::PICS.lock().initialize() };
   x86_64::instructions::interrupts::enable();
 
+  time::init();
+
+  let uptime = time::uptime();
+  println!("Uptime: {}", uptime);
+
   // Initializee Page Tables and Heap
   let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
   let mut mapper = unsafe { memory::init(phys_mem_offset) };
@@ -59,8 +65,4 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
   thread.spawn(task::Task::new(task::keyboard::print_keypresses()));
 
   thread.run();
-}
-
-fn get_last_result() {
-
 }
