@@ -5,7 +5,7 @@
 use core::panic::PanicInfo;
 
 use bootloader::BootInfo;
-use x86_64::{VirtAddr, structures::paging::{Translate}};
+use x86_64::{VirtAddr};
 
 use crate::memory::BootInfoFrameAllocator;
 extern crate alloc;
@@ -20,7 +20,6 @@ mod serial;
 mod memory;
 mod task;
 mod time;
-mod clock;
 mod cmos;
 
 /// This function is called on panic.
