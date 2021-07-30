@@ -50,6 +50,10 @@ pub fn uptime() -> f64 {
   time_between_ticks() * ticks() as f64
 }
 
+pub fn last_rtc_update() -> usize {
+  LAST_RTC_UPDATE.load(Ordering::Relaxed)
+}
+
 pub fn sleep(seconds: f64) {
   let start = uptime();
   while uptime() - start < seconds {

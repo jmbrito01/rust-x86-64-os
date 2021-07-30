@@ -20,6 +20,8 @@ mod serial;
 mod memory;
 mod task;
 mod time;
+mod clock;
+mod cmos;
 
 /// This function is called on panic.
 #[panic_handler]
@@ -47,10 +49,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
   unsafe { interrupts::PICS.lock().initialize() };
   x86_64::instructions::interrupts::enable();
 
+  // Initiate clock operations
   time::init();
-
-  let uptime = time::uptime();
-  println!("Uptime: {}", uptime);
+  let rtc = cmos::CMOS::new().rtc();
+  println!("Current Time: {}/{}/{} - {}:{}:{}", rtc.day, rtc.month, rtc.year, rtc.hour, rtc.minute, rtc.second);
 
   // Initializee Page Tables and Heap
   let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
