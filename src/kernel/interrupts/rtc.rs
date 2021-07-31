@@ -4,7 +4,6 @@ use crate::{kprintln, kernel::{interrupts::{InterruptIndex, PICS}, time}};
 pub extern "x86-interrupt" fn rtc_interrupt_handler(
   stack_frame: InterruptStackFrame)
 {
-  kprintln!(".");
   time::on_rtc_interrupt(stack_frame);
   
   unsafe {
