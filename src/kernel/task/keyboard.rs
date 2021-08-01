@@ -1,13 +1,12 @@
 use conquer_once::spin::OnceCell;
 use crossbeam_queue::ArrayQueue;
 use futures_util::stream::StreamExt;
-use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
+use pc_keyboard::{DecodedKey, HandleControl, KeyCode, Keyboard, ScancodeSet1, layouts};
 use core::{pin::Pin, task::{Poll, Context}};
 use futures_util::stream::Stream;
 use futures_util::task::AtomicWaker;
 
-use crate::kprintln;
-use crate::kprint;
+use crate::{kernel::{self, interrupts}, kprintln};  
 
 /// Called by the keyboard interrupt handler
 ///
@@ -24,7 +23,19 @@ pub(crate) fn add_scancode(scancode: u8) {
   }
 }
 
-pub async fn print_keypresses() {
+fn handle_unicode_press(c: char) {
+  interrupts::without_interrupts(|| {
+    kernel::console::handle_unicode_press(c)
+  });
+}
+
+fn handle_raw_press(c: KeyCode) {
+  interrupts::without_interrupts(|| {
+    kernel::console::handle_raw_press(c)
+  });
+}
+
+pub async fn handle_keypresses() {
   let mut scancodes = ScancodeStream::new();
   let mut keyboard = Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::Ignore);
 
@@ -32,8 +43,8 @@ pub async fn print_keypresses() {
     if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
       if let Some(key) = keyboard.process_keyevent(key_event) {
         match key {
-          DecodedKey::Unicode(character) => kprint!("{}", character),
-          DecodedKey::RawKey(key) => kprint!("{:?}", key),
+          DecodedKey::Unicode(character) => handle_unicode_press(character),
+          DecodedKey::RawKey(key) => handle_raw_press(key),
         }
       }
     }
@@ -76,4 +87,4 @@ impl Stream for ScancodeStream {
 }
 
 static SCANCODE_QUEUE: OnceCell<ArrayQueue<u8>> = OnceCell::uninit();
-static WAKER: AtomicWaker = AtomicWaker::new();
+static WAKER: AtomicWaker = AtomicWaker::new(); 

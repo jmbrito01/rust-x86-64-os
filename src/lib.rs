@@ -1,5 +1,4 @@
 #![no_std]
-#![no_main]
 #![feature(asm,llvm_asm,abi_x86_interrupt,alloc_error_handler)]
 
 use bootloader::BootInfo;
@@ -26,16 +25,18 @@ pub fn init(boot_info: &'static BootInfo) -> ! {
 
   // Initiate clock operations
   kernel::time::init();
-  let rtc = kernel::cmos::CMOS::new().rtc();
-  kprintln!("Current Time: {}/{}/{} - {}:{}:{}", rtc.day, rtc.month, rtc.year, rtc.hour, rtc.minute, rtc.second);
 
-  // Initializee Memory and Heap
+  // Initialize Memory and Heap
   unsafe {
     kernel::memory::init(boot_info);
   }
 
-  let mut thread = kernel::task::executor::Executor::new();
-  thread.spawn(kernel::task::Task::new(kernel::task::keyboard::print_keypresses()));
+  // Initiate PCI Controllers
+  kernel::pci::init();
 
-  thread.run();
+  kernel::console::init();
+
+  // Start running kernel tasks
+  let mut kernel_thread = kernel::task::kernel_worker();
+  kernel_thread.run()
 }

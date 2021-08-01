@@ -3,6 +3,8 @@ use core::fmt;
 use lazy_static::lazy_static;
 use spin::Mutex;
 
+use super::interrupts;
+
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -100,6 +102,16 @@ impl Writer {
     }
   }
 
+  pub fn erase_last(&mut self) {
+    let blank = ScreenChar {
+      ascii_character: b' ',
+      color_code: self.color_code,
+    };
+    let row = BUFFER_HEIGHT - 1;
+    self.column_position -= 1;
+    self.buffer.chars[row][self.column_position].write(blank);
+  }
+
   pub fn write_string(&mut self, s: &str) {
     for byte in s.bytes() {
       match byte {
@@ -146,5 +158,11 @@ pub fn _print(args: fmt::Arguments) {
   // Avoid deadlocks on writer when writing in parallel
   interrupts::without_interrupts(|| { 
     WRITER.lock().write_fmt(args).unwrap();
+  });
+}
+
+pub fn erase_last() {
+  interrupts::without_interrupts(|| {
+    WRITER.lock().erase_last();
   });
 }

@@ -1,4 +1,4 @@
-use x86_64::{PhysAddr, VirtAddr, structures::paging::{FrameAllocator, OffsetPageTable, Page, PageTable, PhysFrame, Size4KiB}};
+use x86_64::{PhysAddr, VirtAddr, structures::paging::{FrameAllocator, OffsetPageTable, PageTable, PhysFrame, Size4KiB}};
 use bootloader::{BootInfo, bootinfo::{MemoryMap, MemoryRegionType}};
 
 pub mod allocator;
@@ -14,9 +14,7 @@ pub unsafe fn init(boot_info: &'static BootInfo) -> OffsetPageTable<'static> {
   let level_4_table = active_level_4_table(physical_mem_offset);
   let mut mapper = OffsetPageTable::new(level_4_table, physical_mem_offset);
 
-  let mut frame_allocator = unsafe {
-    BootInfoFrameAllocator::init(&boot_info.memory_map)
-  };
+  let mut frame_allocator = BootInfoFrameAllocator::init(&boot_info.memory_map);
   allocator::init_heap(&mut mapper, &mut frame_allocator)
     .expect("Heap Allocation failed");
 

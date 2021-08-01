@@ -1,6 +1,8 @@
 use x86_64::instructions::interrupts;
 use x86_64::instructions::port::Port;
 
+use super::time;
+
 #[repr(u8)]
 enum Register {
     Second = 0x00,
@@ -46,7 +48,7 @@ impl CMOS {
 
     pub fn rtc(&mut self) -> RTC {
         while self.is_updating() {
-            x86_64::instructions::hlt();
+            time::halt();
         }
         let mut second = self.read_register(Register::Second);
         let mut minute = self.read_register(Register::Minute);

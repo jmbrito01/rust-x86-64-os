@@ -1,5 +1,3 @@
-use crate::kernel::interrupts;
-
 use super::{Task, TaskId};
 use alloc::{collections::BTreeMap, sync::Arc};
 use core::task::{Context, Poll, Waker};
@@ -23,7 +21,7 @@ impl Executor {
 
   pub fn spawn(&mut self, task: Task) {
     let task_id = task.id;
-    if (self.tasks.insert(task.id, task).is_some()) {
+    if self.tasks.insert(task.id, task).is_some() {
       panic!("Task with same ID already exists in tasks queue");
     }
 
@@ -71,7 +69,7 @@ impl Executor {
 
     interrupts::disable();
 
-    if (self.task_queue.is_empty()) {
+    if self.task_queue.is_empty() {
       enable_and_hlt();
     } else {
       interrupts::enable();

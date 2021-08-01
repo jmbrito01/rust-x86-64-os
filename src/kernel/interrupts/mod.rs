@@ -73,11 +73,11 @@ pub fn without_interrupts<F, R>(f: F) -> R where F: FnOnce() -> R {
 #[repr(u8)]
 pub enum InterruptIndex {
     Timer = PIC_1_OFFSET,
-    Keyboard,
+    Keyboard = PIC_1_OFFSET + 1,
+    FloppyDisk = PIC_1_OFFSET + 6,
     RTC = PIC_1_OFFSET + 8,
-    // FloppyDisk = 6,
-    // PrimaryATAHardDisk = 14,
-    // SecondaryATAHardDisk = 15,
+    PrimaryATAHardDisk = PIC_1_OFFSET + 14,
+    SecondaryATAHardDisk = PIC_1_OFFSET + 15,
 }
 
 impl InterruptIndex {

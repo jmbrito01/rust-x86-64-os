@@ -1,6 +1,6 @@
 use core::{convert::TryInto, sync::atomic::{AtomicUsize, AtomicU64, Ordering}};
 use x86_64::{instructions::port::Port, structures::idt::InterruptStackFrame};
-use crate::{kprintln, kernel::{interrupts}};
+use crate::{kernel::{interrupts}};
 
 const PIT_FREQUENCY: f64 = 3_579_545.0 / 3.0; // 1_193_181.666 Hz
 const PIT_DIVIDER: usize = 1193;
@@ -46,6 +46,10 @@ pub fn time_between_ticks() -> f64 {
   PIT_INTERVAL
 }
 
+pub fn halt() {
+  x86_64::instructions::hlt();
+}
+
 pub fn uptime() -> f64 {
   time_between_ticks() * ticks() as f64
 }
@@ -57,7 +61,7 @@ pub fn last_rtc_update() -> usize {
 pub fn sleep(seconds: f64) {
   let start = uptime();
   while uptime() - start < seconds {
-    x86_64::instructions::hlt();
+    halt();
   }
 }
 

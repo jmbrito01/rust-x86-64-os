@@ -33,3 +33,13 @@ impl TaskId {
     TaskId(NEXT_ID.fetch_add(1, Ordering::Relaxed))
   }
 }
+
+pub fn kernel_worker() -> executor::Executor {
+  // Create new executor for handling kernel tasks
+  let mut thread = executor::Executor::new();
+
+  // Spawn kernel threads
+  thread.spawn(Task::new(keyboard::handle_keypresses()));
+
+  thread
+}

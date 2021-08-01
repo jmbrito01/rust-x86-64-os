@@ -1,5 +1,5 @@
 use x86_64::structures::idt::InterruptStackFrame;
-use crate::{kprintln, kernel::{interrupts::{InterruptIndex, PICS}, time}};
+use crate::{kernel::{interrupts::{InterruptIndex, PICS}, time}};
 
 pub extern "x86-interrupt" fn rtc_interrupt_handler(
   stack_frame: InterruptStackFrame)

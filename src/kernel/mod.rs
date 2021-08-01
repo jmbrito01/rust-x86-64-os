@@ -6,3 +6,6 @@ pub mod memory;
 pub mod task;
 pub mod time;
 pub mod cmos;
+pub mod console;
+pub mod pci;
+pub mod command_line;

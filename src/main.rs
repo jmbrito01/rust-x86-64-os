@@ -15,7 +15,7 @@ bootloader::entry_point!(kernel_main);
 fn panic(_info: &PanicInfo) -> ! {
 
   loop {
-    x86_64::instructions::hlt();
+    os_x86::kernel::time::halt();
   }
 }
 
