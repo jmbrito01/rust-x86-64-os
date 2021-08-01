@@ -6,7 +6,7 @@ use lazy_static::lazy_static;
 use pc_keyboard::{KeyCode};
 use spin::Mutex;
 
-use super::vga_buffer;
+use super::{time, vga_buffer};
 
 lazy_static! {
   static ref STDIN: Mutex<String> = Mutex::new(String::new());

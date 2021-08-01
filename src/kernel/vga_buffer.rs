@@ -61,8 +61,21 @@ pub struct Writer {
 
 impl Writer {
   pub fn write_byte(&mut self, byte: u8) {
+    let blank = ScreenChar {
+      ascii_character: b' ',
+      color_code: self.color_code,
+    };
+    let cursor = ScreenChar {
+      ascii_character: b' ',
+      color_code: ColorCode::new(Color::Yellow, Color::Yellow),
+    };
     match byte {
-      b'\n' => self.new_line(),
+      b'\n' => {
+        // Clear cursor before going to next line
+        let row = BUFFER_HEIGHT - 1;
+        self.buffer.chars[row][self.column_position].write(blank);
+        self.new_line();
+      },
       byte => {
         if self.column_position >= BUFFER_WIDTH {
           self.new_line();
@@ -77,6 +90,9 @@ impl Writer {
           color_code,
         });
         self.column_position += 1;
+
+        // Print cursor
+        self.buffer.chars[row][self.column_position].write(cursor);
       }
     }
   }
