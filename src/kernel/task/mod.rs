@@ -5,6 +5,7 @@ use core::sync::atomic::{AtomicU64, Ordering};
 
 pub mod keyboard;
 pub mod executor;
+pub mod command_line;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 struct TaskId(u64);
@@ -40,6 +41,7 @@ pub fn kernel_worker() -> executor::Executor {
 
   // Spawn kernel threads
   thread.spawn(Task::new(keyboard::handle_keypresses()));
+  thread.spawn(Task::new(command_line::handle_command_runs()));
 
   thread
 }

@@ -61,19 +61,10 @@ pub struct Writer {
 
 impl Writer {
   pub fn write_byte(&mut self, byte: u8) {
-    let blank = ScreenChar {
-      ascii_character: b' ',
-      color_code: self.color_code,
-    };
-    let cursor = ScreenChar {
-      ascii_character: b' ',
-      color_code: ColorCode::new(Color::Yellow, Color::Yellow),
-    };
     match byte {
       b'\n' => {
         // Clear cursor before going to next line
-        let row = BUFFER_HEIGHT - 1;
-        self.buffer.chars[row][self.column_position].write(blank);
+        self.erase_cursor();
         self.new_line();
       },
       byte => {
@@ -92,10 +83,28 @@ impl Writer {
         self.column_position += 1;
 
         // Print cursor
-        self.buffer.chars[row][self.column_position].write(cursor);
+        self.show_cursor();
       }
     }
   }
+
+  fn erase_cursor(&mut self) {
+    let blank = ScreenChar {
+      ascii_character: b' ',
+      color_code: self.color_code,
+    };
+    let row = BUFFER_HEIGHT - 1;
+    self.buffer.chars[row][self.column_position].write(blank);
+  }
+
+  fn show_cursor(&mut self) {
+    let cursor = ScreenChar {
+      ascii_character: b' ',
+      color_code: ColorCode::new(Color::Yellow, Color::Yellow),
+    };
+    let row = BUFFER_HEIGHT - 1;
+    self.buffer.chars[row][self.column_position].write(cursor);
+  } 
 
   fn new_line(&mut self) {
     for row in 1..BUFFER_HEIGHT {
@@ -124,8 +133,11 @@ impl Writer {
       color_code: self.color_code,
     };
     let row = BUFFER_HEIGHT - 1;
+
+    self.erase_cursor();
     self.column_position -= 1;
     self.buffer.chars[row][self.column_position].write(blank);
+    self.show_cursor();
   }
 
   pub fn write_string(&mut self, s: &str) {

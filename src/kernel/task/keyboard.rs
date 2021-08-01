@@ -23,28 +23,25 @@ pub(crate) fn add_scancode(scancode: u8) {
   }
 }
 
-fn handle_unicode_press(c: char) {
-  interrupts::without_interrupts(|| {
-    kernel::console::handle_unicode_press(c)
-  });
+async fn handle_unicode_press(c: char) {
+  // TODO: Do this without interrupts
+  kernel::console::handle_unicode_press(c).await
 }
 
-fn handle_raw_press(c: KeyCode) {
-  interrupts::without_interrupts(|| {
-    kernel::console::handle_raw_press(c)
-  });
+async fn handle_raw_press(c: KeyCode) {
+  // TODO: Do this without interrupts
+  kernel::console::handle_raw_press(c).await
 }
 
 pub async fn handle_keypresses() {
   let mut scancodes = ScancodeStream::new();
   let mut keyboard = Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::Ignore);
-
   while let Some(scancode) = scancodes.next().await {
     if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
       if let Some(key) = keyboard.process_keyevent(key_event) {
         match key {
-          DecodedKey::Unicode(character) => handle_unicode_press(character),
-          DecodedKey::RawKey(key) => handle_raw_press(key),
+          DecodedKey::Unicode(character) => handle_unicode_press(character).await,
+          DecodedKey::RawKey(key) => handle_raw_press(key).await,
         }
       }
     }

@@ -15,6 +15,9 @@ fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
 }
 
 pub fn init(boot_info: &'static BootInfo) -> ! {
+  // Initiate clock operations
+  kernel::time::init();
+
   // Initiate GDT
   kernel::gdt::init();
 
@@ -22,9 +25,6 @@ pub fn init(boot_info: &'static BootInfo) -> ! {
   kernel::interrupts::init_idt();
   unsafe { kernel::interrupts::PICS.lock().initialize() };
   x86_64::instructions::interrupts::enable();
-
-  // Initiate clock operations
-  kernel::time::init();
 
   // Initialize Memory and Heap
   unsafe {
@@ -34,9 +34,13 @@ pub fn init(boot_info: &'static BootInfo) -> ! {
   // Initiate PCI Controllers
   kernel::pci::init();
 
+  
+
   kernel::console::init();
+  kernel::console::set_waiting_input(true); // Enables user inputs
 
   // Start running kernel tasks
   let mut kernel_thread = kernel::task::kernel_worker();
+
   kernel_thread.run()
 }
