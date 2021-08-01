@@ -2,12 +2,12 @@ use alloc::{string::String, vec::Vec};
 use conquer_once::spin::OnceCell;
 use crossbeam_queue::ArrayQueue;
 use futures_util::stream::StreamExt;
-use pc_keyboard::{DecodedKey, HandleControl, KeyCode, Keyboard, ScancodeSet1, layouts};
-use core::{fmt::Write, pin::Pin, task::{Poll, Context}};
+
+use core::{pin::Pin, task::{Poll, Context}};
 use futures_util::stream::Stream;
 use futures_util::task::AtomicWaker;
 
-use crate::{kernel::{self, command_line}, kprintln};  
+use crate::{kernel::{command_line}, kprintln};  
 
 /// Called by the keyboard interrupt handler
 ///

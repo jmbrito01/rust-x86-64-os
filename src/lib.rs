@@ -34,8 +34,6 @@ pub fn init(boot_info: &'static BootInfo) -> ! {
   // Initiate PCI Controllers
   kernel::pci::init();
 
-  
-
   kernel::console::init();
   kernel::console::set_waiting_input(true); // Enables user inputs
 

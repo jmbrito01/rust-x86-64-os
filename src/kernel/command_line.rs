@@ -2,7 +2,7 @@ use alloc::{string::String, vec::Vec};
 
 use crate::{kernel::time, kprintln};
 
-use super::{console, interrupts};
+use super::{console};
 
 pub async fn run_command(command: &str, args: Vec<String>) {
   let mut args_iter = args.iter();
