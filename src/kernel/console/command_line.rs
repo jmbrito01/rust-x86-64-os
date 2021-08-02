@@ -1,8 +1,8 @@
-use alloc::{string::String, vec::Vec};
 
-use crate::{kernel::time, kprintln};
+use alloc::{string::{String, ToString}, vec::Vec};
+use crate::{kernel::{time}, kprintln};
+use super::{console, task};
 
-use super::{console};
 
 pub async fn run_command(command: &str, args: Vec<String>) {
   let mut args_iter = args.iter();
@@ -20,9 +20,16 @@ pub async fn run_command(command: &str, args: Vec<String>) {
         .expect("Sleep command requires one parameter");
       let ms = seconds_string.parse::<f64>()
         .expect("Invalid argument seconds");
-      kprintln!("Sleeping for {} seconds", ms);
       time::sleep(ms);
-    }
+    },
+    "exec" => {
+      let command = args_iter.next().unwrap();
+      let args: Vec<String> = args_iter
+        .map(|e| e.to_string())
+        .collect();
+      
+      task::command_line::push_command(command, args);
+    },
     _ => {
       kprintln!("ERROR: Invalid command: {}", command);
     }

@@ -7,7 +7,7 @@ use core::{pin::Pin, task::{Poll, Context}};
 use futures_util::stream::Stream;
 use futures_util::task::AtomicWaker;
 
-use crate::{kernel::{command_line}, kprintln};  
+use crate::{kernel::console::{command_line}, kprintln};  
 
 /// Called by the keyboard interrupt handler
 ///

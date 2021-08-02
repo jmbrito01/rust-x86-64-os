@@ -1,7 +1,13 @@
-use x86_64::{PhysAddr, VirtAddr, structures::paging::{FrameAllocator, OffsetPageTable, PageTable, PhysFrame, Size4KiB}};
+use spin::Mutex;
+use x86_64::{PhysAddr, VirtAddr, structures::paging::{FrameAllocator, OffsetPageTable, PageTable, PhysFrame, Size4KiB, Translate}};
 use bootloader::{BootInfo, bootinfo::{MemoryMap, MemoryRegionType}};
+use lazy_static::lazy_static;
 
 pub mod allocator;
+
+lazy_static! {
+  static ref PHYS_MEMORY_OFFSET: Mutex<u64> = Mutex::new(0);
+}
 
 /// Initialize a new OffsetPageTable.
 ///
@@ -18,7 +24,15 @@ pub unsafe fn init(boot_info: &'static BootInfo) -> OffsetPageTable<'static> {
   allocator::init_heap(&mut mapper, &mut frame_allocator)
     .expect("Heap Allocation failed");
 
+  // Saves phyisical mem offset for later
+  let mut offset = PHYS_MEMORY_OFFSET.lock();
+  *offset = boot_info.physical_memory_offset;
+
   mapper
+}
+
+pub fn phys_to_virt(addr: PhysAddr) -> VirtAddr {
+  VirtAddr::new(addr.as_u64() + *PHYS_MEMORY_OFFSET.lock())
 }
 
 /// Returns a mutable reference to the active level 4 table.

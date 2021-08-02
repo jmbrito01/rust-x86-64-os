@@ -22,9 +22,7 @@ pub fn init(boot_info: &'static BootInfo) -> ! {
   kernel::gdt::init();
 
   // Initiate interrupt handlers
-  kernel::interrupts::init_idt();
-  unsafe { kernel::interrupts::PICS.lock().initialize() };
-  x86_64::instructions::interrupts::enable();
+  kernel::interrupts::init();
 
   // Initialize Memory and Heap
   unsafe {
@@ -34,8 +32,7 @@ pub fn init(boot_info: &'static BootInfo) -> ! {
   // Initiate PCI Controllers
   kernel::pci::init();
 
-  kernel::console::init();
-  kernel::console::set_waiting_input(true); // Enables user inputs
+  kernel::console::init(true); // Init console with user inputs
 
   // Start running kernel tasks
   let mut kernel_thread = kernel::task::kernel_worker();

@@ -1,4 +1,4 @@
-pub mod vga_buffer;
+pub mod vga;
 pub mod interrupts;
 pub mod gdt;
 pub mod serial;
@@ -8,4 +8,3 @@ pub mod time;
 pub mod cmos;
 pub mod console;
 pub mod pci;
-pub mod command_line;

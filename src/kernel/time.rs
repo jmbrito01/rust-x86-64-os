@@ -1,8 +1,8 @@
 use core::{convert::TryInto, sync::atomic::{AtomicUsize, AtomicU64, Ordering}};
 use x86_64::{instructions::port::Port, structures::idt::InterruptStackFrame};
-use crate::{kernel::{interrupts}, kprintln};
+use crate::{kernel::{interrupts}};
 
-const PIT_FREQUENCY: f64 = 1_193_181.666 / 2.0;
+const PIT_FREQUENCY: f64 = 1_193_181.666 * 0.7;
 const PIT_DIVIDER: usize = 1193;
 const PIT_INTERVAL: f64 = (PIT_DIVIDER as f64) / PIT_FREQUENCY;
 
@@ -61,15 +61,6 @@ pub fn last_rtc_update() -> usize {
 pub fn sleep(seconds: f64) {
   let start = uptime();
   while uptime() - start < seconds {
-    kprintln!("{}", uptime());
-    halt();
-  }
-}
-
-pub async fn sleep_async(seconds: f64) {
-  let start = uptime();
-  while uptime() - start < seconds {
-    kprintln!("{}", uptime());
     halt();
   }
 }

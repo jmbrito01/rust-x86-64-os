@@ -127,16 +127,24 @@ impl Writer {
     }
   }
 
-  pub fn erase_last(&mut self) {
+  pub fn erase_last_char(&mut self, size: usize) {
     let blank = ScreenChar {
       ascii_character: b' ',
       color_code: self.color_code,
     };
     let row = BUFFER_HEIGHT - 1;
-
+    let mut columns_to_erase = size.clone();
+    if columns_to_erase > self.column_position {
+      columns_to_erase = self.column_position
+    }
+    let pos_erased_cur_column = self.column_position - columns_to_erase;
     self.erase_cursor();
-    self.column_position -= 1;
-    self.buffer.chars[row][self.column_position].write(blank);
+
+    for pos in self.column_position..pos_erased_cur_column {
+      self.buffer.chars[row][pos].write(blank);
+    }
+
+    self.column_position -= columns_to_erase;
     self.show_cursor();
   }
 
@@ -169,7 +177,7 @@ lazy_static! {
 
 #[macro_export]
 macro_rules! kprint {
-  ($($arg:tt)*) => ($crate::kernel::vga_buffer::_print(format_args!($($arg)*)));
+  ($($arg:tt)*) => ($crate::kernel::vga::_print(format_args!($($arg)*)));
 }
 
 #[macro_export]
@@ -189,8 +197,8 @@ pub fn _print(args: fmt::Arguments) {
   });
 }
 
-pub fn erase_last() {
+pub fn erase_last_character(size: usize) {
   interrupts::without_interrupts(|| {
-    WRITER.lock().erase_last();
+    WRITER.lock().erase_last_char(size);
   });
 }

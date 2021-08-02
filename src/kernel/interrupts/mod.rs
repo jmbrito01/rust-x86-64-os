@@ -3,7 +3,7 @@
 use x86_64::structures::idt::InterruptDescriptorTable;
 use lazy_static::lazy_static;
 use crate::kernel::gdt;
-use crate::kprintln;
+
 use pic8259::ChainedPics;
 use spin;
 
@@ -43,10 +43,11 @@ lazy_static! {
   };
 }
 
-pub fn init_idt() {
-  kprintln!("[ INTERRUPTS ] Starting to load IDT.");
+pub fn init() {
   IDT.load();
-  kprintln!("[ INTERRUPTS ] IDT loaded successfully.");
+  
+  unsafe { PICS.lock().initialize() };
+  x86_64::instructions::interrupts::enable();
 }
 
 pub fn without_interrupts<F, R>(f: F) -> R where F: FnOnce() -> R {

@@ -9,8 +9,7 @@ image:
 	dd conv=notrunc if=$(bin) of=$(img)
 
 run:
-	qemu-system-x86_64 -drive id=boot,format=raw,file=disk.img -vga cirrus -cpu "Conroe"
-
+	qemu-system-x86_64 -drive id=boot,format=raw,file=disk.img -vga cirrus
 debug:
 	make image
 	make run
